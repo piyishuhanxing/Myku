@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>气候·资源·营造 - 建筑适应性演变</title>
+    <!-- 1. 引入ECharts核心库 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+    <style>
+        /* 2. 简单的CSS：让图表充满整个页面 */
+        #chart-container {
+            width: 1200px;
+            height: 600px;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- 3. 准备一个容器放图表 -->
+    <div id="chart-container"></div>
+
+    <script>
+        // 基于准备好的容器，初始化图表
+var myChart = echarts.init(document.getElementById('chart-container'));
+
+// 这是从你Excel表格转换来的数据（后续用Python清洗后得到）
+var years = ['618', '960', '1368', '1644'];  // X轴：年份
+var climateData = [1.2, 0.8, -0.5, -1.0];     // Y轴1：气候指数
+var woodData = [85, 72, 58, 45];              // Y轴2：木材直径(cm)
+var dougongData = [2.1, 3.5, 5.2, 6.8];       // Y轴3：斗拱密度(个/米)
+
+// 图表的配置
+var option = {
+    // 标题
+    title: {
+        text: '气候·木材·斗拱 联动演变 (唐-清)',
+        left: 'center'
+    },
+    // 提示框（鼠标悬停显示）
+    tooltip: {
+        trigger: 'axis',  // 坐标轴触发
+        // 自定义提示框内容，这里将来要显示建筑图片
+        formatter: function(params) {
+            // params是当前点的数据，后续可以在这里拼接图片HTML
+            return params[0].name + '年<br>' +
+                   '气候: ' + params[0].data + '<br>' +
+                   '木材: ' + params[1].data + 'cm<br>' +
+                   '斗拱: ' + params[2].data + '个/米';
+        }
+    },
+    // 图例
+    legend: {
+        data: ['气候温度指数', '木材平均直径', '斗拱密度'],
+        left: 'left'
+    },
+    // X轴配置
+    xAxis: {
+        type: 'category',
+        data: years,
+        name: '年份',
+        axisLabel: {
+            rotate: 0  // 年份不旋转
+        }
+    },
+    // **重点：多Y轴配置** - 这里有三个Y轴[citation:2][citation:5]
+    yAxis: [
+        {
+            type: 'value',
+            name: '气候温度指数',
+            position: 'left',      // 靠左
+            axisLine: { lineStyle: { color: '#ff6b6b' } },  // 暖色
+            axisLabel: {
+                formatter: '{value} °C'
+            }
+        },
+        {
+            type: 'value',
+            name: '木材直径 (cm)',
+            position: 'right',      // 靠右
+            offset: 0,              // 第一个右轴的位置
+            axisLine: { lineStyle: { color: '#4ecdc4' } },
+            axisLabel: {
+                formatter: '{value} cm'
+            }
+        },
+        {
+            type: 'value',
+            name: '斗拱密度 (个/米)',
+            position: 'right',      // 也靠右
+            offset: 80,             // 往右偏移80像素，避免和第二个轴重叠
+            axisLine: { lineStyle: { color: '#f9ca24' } },
+            axisLabel: {
+                formatter: '{value} 个/米'
+            }
+        }
+    ],
+    // 数据系列
+    series: [
+        {
+            name: '气候温度指数',
+            type: 'line',           // 折线图
+            yAxisIndex: 0,           // 使用第0个Y轴（左边那个）
+            data: climateData,
+            lineStyle: { color: '#ff6b6b', width: 3 },
+            smooth: true,            // 平滑曲线
+            // 暖色/冷色渐变：温度高时暖色，低时冷色
+            itemStyle: {
+                color: function(param) {
+                    // 根据数据值返回不同颜色
+                    var value = param.data;
+                    return value > 0 ? '#ff6b6b' : '#54a0ff';
+                }
+            }
+        },
+        {
+            name: '木材平均直径',
+            type: 'bar',             // 柱状图
+            yAxisIndex: 1,            // 使用第1个Y轴（右边第一个）
+            data: woodData,
+            itemStyle: { color: '#4ecdc4' },
+            barWidth: 40
+        },
+        {
+            name: '斗拱密度',
+            type: 'line',            // 折线图
+            yAxisIndex: 2,            // 使用第2个Y轴（右边第二个）
+            data: dougongData,
+            lineStyle: { color: '#f9ca24', width: 3 },
+            smooth: true
+        }
+    ],
+    // 数据区域缩放 - 这就是你要的底部时间轴滑块！
+    dataZoom: [
+        {
+            type: 'slider',          // 滑块类型
+            start: 0,                 // 从0%开始
+            end: 100,                 // 到100%结束
+            bottom: 10,               // 距离底部10像素
+            height: 20                // 滑块高度
+        }
+    ],
+    // 网格区域调整
+    grid: {
+        bottom: '15%'                 // 留出底部空间给滑块
+    }
+};
+
+// 使用配置显示图表
+myChart.setOption(option);
+    </script>
+</body>
+</html>
