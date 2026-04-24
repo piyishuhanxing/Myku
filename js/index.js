@@ -515,113 +515,95 @@
     }));
 
     const mapChart = echarts.init(document.querySelector("#ancientBridgeMap"));
-    mapChart.showLoading();
-
-    $.getJSON('https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json', function(geoJson) {
-        mapChart.hideLoading();
-        echarts.registerMap('china', geoJson);
-
-        const option = {
-            geo: {
-                map: 'china',
-                roam: true,
-                zoom: 1.2,
-                center: [108, 35],
-                label: {
-                    show: true,
-                    fontSize: 10,
-                    color: '#555'
-                },
-                emphasis: {
-                    label: { show: true, fontWeight: 'bold' },
-                    itemStyle: { areaColor: '#ffd966' }
-                },
-                itemStyle: {
-                    borderColor: '#cbb386',
-                    borderWidth: 0.8,
-                    areaColor: '#f7efdf'
-                }
+    
+    // 直接使用 china.js 中注册的地图，无需额外请求
+    const option = {
+        geo: {
+            map: 'china',
+            roam: true,
+            zoom: 1.2,
+            center: [108, 35],
+            label: {
+                show: true,
+                fontSize: 10,
+                color: '#555'
             },
-            tooltip: {
-                trigger: 'item',
-                formatter: function(params) {
-                    if (params.seriesType === 'scatter') {
-                        return `<b>${params.data.name}</b><br/>${params.data.city}<br/>点击查看详细介绍`;
-                    } else if (params.componentSubType === 'geo') {
-                        return `<b>${params.name}</b><br/>该地区古桥信息请点击红色标记点`;
-                    }
-                    return params.name;
-                }
+            emphasis: {
+                label: { show: true, fontWeight: 'bold' },
+                itemStyle: { areaColor: '#ffd966' }
             },
-            series: [{
-                type: 'scatter',
-                coordinateSystem: 'geo',
-                data: scatterData,
-                symbolSize: 22,
-                symbol: 'circle',
-                itemStyle: {
-                    color: '#ff4444',
-                    borderColor: '#ffffff',
-                    borderWidth: 2,
-                    shadowBlur: 8,
-                    shadowColor: 'rgba(0,0,0,0.3)'
-                },
-                label: {
-                    show: true,
-                    formatter: function(params) {
-                        return params.data.name;
-                    },
-                    position: 'top',
-                    offset: [0, 8],
-                    fontSize: 12,
-                    fontWeight: 'bold',
-                    color: '#c0392b',
-                    textShadowBlur: 2,
-                    textShadowColor: '#fff'
-                },
-                emphasis: {
-                    scale: true,
-                    label: { show: true, fontWeight: 'bold', fontSize: 13 },
-                    itemStyle: { color: '#ff6666', shadowBlur: 15 }
-                }
-            }]
-        };
-
-        mapChart.setOption(option);
-
-        // ========== 点击事件（修改后的代码） ==========
-        mapChart.off('click');  // 先移除旧的事件，避免重复绑定
-        mapChart.on('click', function(params) {
-            console.log('点击事件触发:', params);  // 调试用，确认事件是否触发
-            
-            if (params.seriesType === 'scatter' && params.data) {
-                const bridge = params.data;
-                console.log('点击的桥梁:', bridge.name);  // 调试用
-                
-                // 根据桥梁名称映射到不同的页面文件
-                const pageMap = {
-                    '赵州桥': 'zhaozhou.html',
-                    '洛阳桥': 'luoyang.html',
-                    '广济桥': 'guangji.html',
-                    '卢沟桥': 'lugou.html'
-                };
-                
-                const targetPage = pageMap[bridge.name];
-                if (targetPage) {
-                    console.log('跳转到:', targetPage);  // 调试用
-                    window.open(targetPage, '_blank');
-                } else {
-                    // 兜底：如果找不到对应页面，跳转到通用页面
-                    window.open(`bridge-detail.html?bridge=${encodeURIComponent(bridge.name)}`, '_blank');
-                }
+            itemStyle: {
+                borderColor: '#cbb386',
+                borderWidth: 0.8,
+                areaColor: '#f7efdf'
             }
-        });
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+                if (params.seriesType === 'scatter') {
+                    return `<b>${params.data.name}</b><br/>${params.data.city}<br/>点击查看详细介绍`;
+                } else if (params.componentSubType === 'geo') {
+                    return `<b>${params.name}</b><br/>该地区古桥信息请点击红色标记点`;
+                }
+                return params.name;
+            }
+        },
+        series: [{
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            data: scatterData,
+            symbolSize: 22,
+            symbol: 'circle',
+            itemStyle: {
+                color: '#ff4444',
+                borderColor: '#ffffff',
+                borderWidth: 2,
+                shadowBlur: 8,
+                shadowColor: 'rgba(0,0,0,0.3)'
+            },
+            label: {
+                show: true,
+                formatter: function(params) {
+                    return params.data.name;
+                },
+                position: 'top',
+                offset: [0, 8],
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: '#c0392b',
+                textShadowBlur: 2,
+                textShadowColor: '#fff'
+            },
+            emphasis: {
+                scale: true,
+                label: { show: true, fontWeight: 'bold', fontSize: 13 },
+                itemStyle: { color: '#ff6666', shadowBlur: 15 }
+            }
+        }]
+    };
 
-        console.log('古桥地图加载完成，点击红色标记点将跳转到对应的古桥介绍页面');
-    }).fail(function() {
-        mapChart.hideLoading();
-        console.error('地图数据加载失败');
-        alert('地图数据加载失败，请检查网络后刷新页面');
+    mapChart.setOption(option);
+
+    // 点击事件
+    mapChart.off('click');
+    mapChart.on('click', function(params) {
+        if (params.seriesType === 'scatter' && params.data) {
+            const bridge = params.data;
+            const pageMap = {
+                '赵州桥': 'zhaozhou.html',
+                '洛阳桥': 'luoyang.html',
+                '广济桥': 'guangji.html',
+                '卢沟桥': 'lugou.html'
+            };
+            
+            const targetPage = pageMap[bridge.name];
+            if (targetPage) {
+                window.open(targetPage, '_blank');
+            } else {
+                window.open(`bridge-detail.html?bridge=${encodeURIComponent(bridge.name)}`, '_blank');
+            }
+        }
     });
 
     window.addEventListener("resize", function() {
