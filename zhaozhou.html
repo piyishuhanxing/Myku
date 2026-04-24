@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>赵州桥-技术特性数据可视化</title>
+<!--引入ECharts库-->
+<script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing: border-box;
+}
+html, body{
+width:100%;
+height:100%;
+margin:0;
+padding:0;
+}
+body{
+background:#f5f7fa;
+font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',sans-serif;
+}
+.layout-card{
+width: 100%;
+margin:0 auto;
+background: white;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+overflow: hidden;
+}
+.global-header {
+            background: url('images/赵州桥背景.jpg') no-repeat center center;
+            background-size: cover;
+            padding: 1.8rem 2.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            text-align: center;
+        }
+
+        .global-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E2A3E, #2C3E50);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: #8b5a2b;
+            letter-spacing: -0.3px;
+            display: inline-block;
+            padding-left: 1.2rem;
+        }
+
+        .global-header .sub {
+            color: rgba(188, 11, 11, 0.8);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+.content-split{
+display:grid;
+grid-template-columns: 1fr 1.05fr;
+gap:0;
+}
+        .left-text {
+         background: url('images/赵州桥文字.jpg') no-repeat center center;
+         background-size: cover;
+         padding: 2rem 2rem 2rem 2.5rem;
+         border-right: 1px solid #e9edf2;
+         transition: all 0.2s;
+       }
+.text-card h2{
+font-size: 1.8rem;
+font-weight:600;
+color:#1e293b;
+margin-bottom: 1.2rem;
+}
+.text-card p{
+color:#2c3e50;
+line-height: 1.65;
+font-size: 1rem;
+margin-bottom:1.5rem;
+}
+.text-card .highlight{
+background:#e3f2fd;
+padding:1.2rem;
+border-radius:1rem;
+margin:1rem 0;
+font-weight:500;
+color:#0f172a;
+border-left: 4px solid #1e3a8a;
+}
+.text-card ul{
+list-style: none;
+margin-top:0.5rem;
+}
+.text-card li{
+margin-bottom: 0.75rem;
+display: flex;
+align-items: center;
+gap:0.75rem;
+color:#334155;
+}
+.text-card li::before{
+content:"→";
+color:#1e3a8a;
+font-weight: bold;
+}
+        .right-area {
+           display: flex;
+           flex-direction: column;
+           background: url('images/赵州桥文字.jpg') no-repeat center center;
+           background-size: cover;
+           padding: 2rem 2rem 2rem 1.8rem;
+           gap: 1.8rem;
+       }
+.image-carousel{
+position: relative;
+background:#f8fafc;
+border-radius:1.5rem;
+overflow: hidden;
+box-shadow:0 6px 14px rgba(0,0,0,0.03);
+border:1px solid #eef2f8;
+min-height:260px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.carousel-img{
+width:100%;
+height:300px;
+object-fit: cover;
+}
+.carousel-btn{
+position: absolute;
+top:50%;
+transform: translateY(-50%);
+background: rgba(0,0,0,0.55);
+border: none;
+color: white;
+font-size: 1.5rem;
+width: 44px;
+height: 44px;
+border-radius:50%;
+cursor: pointer;
+z-index:20;
+}
+.carousel-btn.prev{
+left:16px;
+}
+.carousel-btn.next{
+right:16px;
+}
+.carousel-dots{
+position: absolute;
+bottom:16px;
+left:0;
+right:0;
+display: flex;
+justify-content: center;
+gap:12px;
+z-index:20;
+}
+.dot{
+width: 10px;
+height:10px;
+background-color: rgba(255,255,255,0.6);
+border-radius: 50%;
+cursor: pointer;
+transition: all 0.2s;
+}
+.dot.active{
+background-color:#1e3a8a;
+transform: scale(1.2);
+}
+.charts-split{
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 1.5rem;
+}
+.chart-card{
+background:#ffffff;
+border-radius:1.2rem;
+border: 1px solid #e9edf2;
+box-shadow: 0 6px 12px -6px rgba(0,0,0,0.05);
+min-height: 260px;
+}
+.chart-container{
+padding: 1.5rem 1rem;
+min-height:220px;
+}
+.chart-title{
+font-size:1.2rem;
+font-weight:600;
+color:#1e2a3e;
+margin-bottom:0.8rem;
+text-align: center;
+}
+.chart-description{
+font-size: 0.85rem;
+color:#5b6e8c;
+margin-top:0.4rem;
+text-align: center;
+}
+.tech-stats-container{
+display:grid;
+grid-template-columns: repeat(2, 1fr);
+gap:1rem;
+margin-top:1.5rem;
+}
+.tech-stat-box{
+background: linear-gradient(135deg,#e8eaf6,#c5cae9);
+padding:1rem;
+border-radius: 0.8rem;
+text-align: center;
+border-left: 4px solid #1e3a8a;
+}
+.stat-value{
+font-size: 1.5rem;
+font-weight: bold;
+color:#1e3a8a;
+}
+.stat-label{
+font-size: 0.8rem;
+color:#5b6e8c;
+margin-top:0.3rem;
+}
+.feature-item{
+background:#f8f9fa;
+padding:1rem;
+border-radius:0.8rem;
+margin-bottom:1rem;
+border-left: 4px solid #1e3a8a;
+}
+.feature-title{
+color:#1e293b;
+font-size:1.1rem;
+font-weight:600;
+margin-bottom: 0.5rem;
+}
+.feature-desc{
+color:#475569;
+line-height: 1.5;
+font-size: 0.9rem;
+}
+@media(max-width:950px){
+.content-split{
+grid-template-columns:1fr;
+}
+.left-text{
+border-right: none;
+border-bottom: 1px solid #e9edf2;
+padding:1.8rem;
+}
+.right-area{
+padding:1.8rem;
+}
+.global-header h1{
+font-size:1.8rem;
+}
+}
+@media(max-width:640px){
+.charts-split{
+grid-template-columns:1fr;
+gap:1rem;
+}
+.chart-card{
+min-height: 220px;
+}
+.right-area{
+gap:1.2rem;
+}
+.global-header{
+padding:1.2rem 1.5rem;
+}
+.text-card h2{
+font-size:1.5rem;
+}
+}
+</style>
+</head>
+<body>
+<div class="layout-card">
+<!--全局头部-->
+<div class="global-header">
+<h1>赵州桥-技术特性数据可视化</h1>
+<div class="sub">中国古代四大名桥之首 | 世界现存最古老单孔敞肩石拱桥</div>
+</div>
+
+<!--内容区域:左右分开-->
+<div class="content-split">
+<!--左侧文字区域-->
+<div class="left-text">
+<div class="text-card">
+<h2>赵州桥工程特性分析</h2>
+<p>赵州桥，又称安济桥，位于河北省赵县洨河之上，由隋代匠师李春于公元595–605年设计建造。它是世界上现存最早、保存最完整的单孔敞肩（空腹式）石拱桥，距今已有1400余年历史。</p>
+<div class="highlight">
+结构创新：首创"敞肩拱"结构。在大拱的两肩各设两个小拱，此举不仅减轻了桥身自重约15%，节省石料，更大幅提升了泄洪能力，且造型优美，如"初月出云，长虹饮涧"。这一设计比欧洲同类技术早出现1200余年。
+</div>
+<p>赵州桥全长64.4米，主拱净跨37.02米，拱矢高7.23米。桥面宽9.6米，采用纵向并列砌筑法，主拱由28道独立拱券纵向并列而成，各道拱券可独立受力，便于局部维修。拱石间以腰铁（铁榫）连接，增强了整体性。</p>
+
+<!--赵州桥技术特性统计-->
+<div class="tech-stats-container">
+<div class="tech-stat-box">
+<div class="stat-value">37.02m</div>
+<div class="stat-label">主拱净跨</div>
+</div>
+<div class="tech-stat-box">
+<div class="stat-value">64.4m</div>
+<div class="stat-label">桥身长度</div>
+</div>
+<div class="tech-stat-box">
+<div class="stat-value">4个</div>
+<div class="stat-label">敞肩小拱</div>
+</div>
+<div class="tech-stat-box">
+<div class="stat-value">1400+年</div>
+<div class="stat-label">历史年限</div>
+</div>
+</div>
+
+<!--技术特性详细分析-->
+<div style="margin-top: 1.5rem;">
+<div class="feature-item">
+<div class="feature-title">圆弧拱与低桥面设计</div>
+<div class="feature-desc">采用小于半圆的弧段（拱矢高仅7.23米），使桥面坡度平缓，便于车马通行，同时实现了大跨度（37米）跨越，解决了洨河汛期洪水湍急的问题。</div>
+</div>
+<div class="feature-item">
+<div class="feature-title">纵向并列砌筑工艺</div>
+<div class="feature-desc">主拱由28道独立拱券纵向并列而成，各道拱券可独立受力，便于局部维修。拱石间以腰铁（铁榫）连接，增强了整体性。</div>
+</div>
+<div class="feature-item">
+<div class="feature-title">选址与地基处理</div>
+<div class="feature-desc">桥基直接坐落在承载能力良好的天然地基（粗砂层）上，历经10余次大洪水、8次战乱及多次地震（如1966年邢台地震）而安然无恙。</div>
+</div>
+</div>
+
+<ul style="margin-top: 1.5rem;">
+<li><strong>历史地位</strong>: 1961年成为首批全国重点文物保护单位；1991年被美国土木工程师学会选定为"国际土木工程历史古迹"。</li>
+<li><strong>技术影响</strong>:敞肩拱结构、纵向并列砌筑法、圆弧拱等创举对后世石拱桥建造产生深远影响，成为世界桥梁史上的里程碑。</li>
+<li><strong>文化象征</strong>:赵州桥是中国古代工匠智慧的结晶，被誉为"天下第一桥"，多次出现在文学作品和艺术创作中。</li>
+</ul>
+
+<p style="margin-top: 1.2rem; font-style: italic; border-left: 2px solid #cbd5e1; padding-left: 1rem;">
+"初月出云，长虹饮涧" —— 唐代张嘉贞《安济桥铭》
+</p>
+</div>
+</div>
+
+<!--右侧区域:上下结构-->
+<div class="right-area">
+<!--右侧上半部分:图集轮播组件-->
+<div class="image-carousel" id="zhaozhouCarousel">
+<img class="carousel-img" id="carouselImage" src="" alt="赵州桥图集">
+<button class="carousel-btn prev" id="prevBtn" aria-label="上一张">&lt;</button>
+<button class="carousel-btn next" id="nextBtn" aria-label="下一张">&gt;</button>
+<div class="carousel-dots" id="dotsContainer"></div>
+</div>
+
+<!--右侧下半部分:图表区域-->
+<div class="charts-split">
+<!--左侧图表容器:结构特性柱状图-->
+<div class="chart-card">
+<div class="chart-container">
+<div class="chart-title">赵州桥结构特性数据</div>
+<div id="structureChart" style="width: 100%; height:240px;"></div>
+<div class="chart-description">主要工程技术参数</div>
+</div>
+</div>
+
+<!--右侧图表容器:技术影响雷达图-->
+<div class="chart-card">
+<div class="chart-container">
+<div class="chart-title">多维度价值评估</div>
+<div id="radarChart" style="width: 100%; height: 240px;"></div>
+<div class="chart-description">六大价值维度综合评分</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+//赵州桥图片轮播
+(function(){
+const imageList=[
+{src:"images/赵州桥1.jpg",alt:"赵州桥全景-世界最古老单孔敞肩石拱桥"},
+{src:"images/赵州桥2.jpg",alt:"赵州桥侧面景观与敞肩拱结构"},
+{src:"images/赵州桥3.jpg",alt:"赵州桥桥面与雕刻细节"},
+{src:"images/赵州桥4.jpg",alt:"赵州桥历史影像"}
+];
+let currentIndex= 0;
+const carouselImg= document.getElementById('carouselImage');
+const prevBtn= document.getElementById('prevBtn');
+const nextBtn= document.getElementById('nextBtn');
+const dotsContainer= document.getElementById('dotsContainer');
+
+function generateDots(){
+dotsContainer.innerHTML='';
+for(let i= 0; i< imageList.length; i++){
+const dot= document.createElement('span');
+dot.classList.add('dot');
+if(i=== currentIndex) dot.classList.add('active');
+dot.dataset.index= i;
+dot.addEventListener('click',(e)=>{
+e.stopPropagation();
+const idx= parseInt(e.currentTarget.dataset.index);
+if(!isNaN(idx)&& idx!== currentIndex){
+currentIndex= idx;
+updateImageAndDots();
+}
+});
+dotsContainer.appendChild(dot);
+}
+}
+
+function updateImageAndDots(){
+if(!imageList.length) return;
+const currentImage= imageList[currentIndex];
+carouselImg.src= currentImage.src;
+carouselImg.alt= currentImage.alt;
+const dots= document.querySelectorAll('.dot');
+dots.forEach((dot, idx)=>{
+if(idx=== currentIndex){
+dot.classList.add('active');
+}else{
+dot.classList.remove('active');
+}
+});
+}
+
+function nextImage(){
+if(imageList.length=== 0) return;
+currentIndex=(currentIndex+1)%imageList.length;
+updateImageAndDots();
+}
+
+function prevImage(){
+if(imageList.length=== 0) return;
+currentIndex=(currentIndex- 1+ imageList.length)% imageList.length;
+updateImageAndDots();
+}
+
+function initCarousel(){
+if(imageList.length === 0){
+carouselImg.src= "https://picsum.photos/id/104/800/500?grayscale";
+carouselImg.alt="暂无赵州桥图片";
+return;
+}
+generateDots();
+currentIndex=0;
+updateImageAndDots();
+
+if(prevBtn) prevBtn.addEventListener('click',(e)=>{
+e.preventDefault();
+prevImage();
+});
+if(nextBtn) nextBtn.addEventListener('click',(e)=>{
+e.preventDefault();
+nextImage();
+});
+
+window.addEventListener('keydown',(e)=>{
+if(e.key==='ArrowLeft'){
+prevImage();
+e.preventDefault();
+}else if(e.key==='ArrowRight'){
+nextImage();
+e.preventDefault();
+}
+});
+}
+
+initCarousel();
+setInterval(nextImage, 4000);
+})();
+
+//初始化ECharts图表
+document.addEventListener('DOMContentLoaded', function(){
+if(typeof echarts==='undefined'){
+console.error("ECharts未加载成功");
+return;
+}
+
+//1.结构特性柱状图
+const structureChart= echarts.init(document.getElementById('structureChart'));
+const structureOption={
+tooltip:{
+trigger:'axis',
+axisPointer:{ type:'shadow'},
+formatter: function(params){
+let result= params[0].name+'<br/>';
+params.forEach(function(item){
+result+= item.marker+ item.seriesName+':'+ item.value;
+if(item.seriesName==='数值'){
+if(params[0].name==='桥身长度'||params[0].name==='主拱净跨'||params[0].name==='拱矢高'){
+result+='米';
+}else if(params[0].name==='历史年限'){
+result+='年';
+}
+}
+result+='<br/>';
+});
+return result;
+}
+},
+grid:{
+left:'3%',
+right:'4%',
+bottom:'3%',
+top:'10%',
+containLabel: true
+},
+xAxis:{
+type:'category',
+data:['桥身长度','主拱净跨','拱矢高','历史年限','敞肩小拱'],
+axisLine:{lineStyle:{color:'#7f8c8d'}},
+axisLabel:{color:'#5b6e8c',fontSize: 12}
+},
+yAxis:{
+type:'value',
+name:'数值',
+axisLine:{lineStyle:{color:'#7f8c8d'}},
+axisLabel:{color:'#5b6e8c',fontSize: 12},
+splitLine:{lineStyle:{color:'#e9edf2'}}
+},
+series:[{
+name:'数值',
+type:'bar',
+barWidth:'60%',
+data:[
+{value: 64.4, itemStyle:{color:'#1e3a8a'}},
+{value: 37.02, itemStyle:{color:'#1e40af'}},
+{value: 7.23, itemStyle:{color:'#3b82f6'}},
+{value: 1400, itemStyle:{color:'#60a5fa'}},
+{value: 4, itemStyle:{color:'#93c5fd'}}
+],
+label:{
+show: true,
+position:'top',
+color:'#1e293b',
+fontWeight:'bold',
+fontSize: 12,
+formatter: function(params){
+if(params.dataIndex === 0) return params.value+'m';
+if(params.dataIndex === 1) return params.value+'m';
+if(params.dataIndex === 2) return params.value+'m';
+if(params.dataIndex === 3) return params.value+'年';
+if(params.dataIndex === 4) return params.value+'个';
+}
+},
+itemStyle:{
+borderRadius:[4, 4, 0, 0]
+}
+}]
+};
+structureChart.setOption(structureOption);
+
+//2.多维度价值雷达图
+const radarChart= echarts.init(document.getElementById('radarChart'));
+const radarOption={
+tooltip:{
+trigger:'item'
+},
+radar:{
+indicator:[
+{name:'结构创新',max:10},
+{name:'耐久性',max:10},
+{name:'工艺水平',max:10},
+{name:'历史影响',max:10},
+{name:'文化价值',max:10},
+{name:'科学价值',max:10}
+],
+center:['50%','50%'],
+radius:'60%',
+axisName:{
+color:'#5b6e8c',
+fontSize: 12
+},
+splitLine:{
+lineStyle:{
+color:'#e9edf2'
+}
+},
+splitArea:{
+show: true,
+areaStyle:{
+color:['rgba(255,255,255,0.8)','rgba(240,242,245,0.6)']
+}
+},
+axisLine:{
+lineStyle:{
+color:'#cbd5e1'
+}
+}
+},
+series:[
+{
+type:'radar',
+data:[
+{
+value:[9.8, 9.5, 9.2, 9.7, 8.9, 9.3],
+name:'赵州桥',
+areaStyle:{
+color:'rgba(30, 58, 138, 0.3)'
+},
+lineStyle:{
+color:'#1e3a8a',
+width: 2
+},
+itemStyle:{
+color:'#1e3a8a'
+},
+label:{
+show: true,
+formatter: function(params){
+return params.value;
+},
+color:'#1e293b',
+fontWeight:'bold',
+fontSize: 11
+}
+}
+]
+}
+]
+};
+radarChart.setOption(radarOption);
+
+//窗口大小变化时重绘
+window.addEventListener('resize', function(){
+structureChart.resize();
+radarChart.resize();
+});
+});
+</script>
+</body>
+</html>
+
+
