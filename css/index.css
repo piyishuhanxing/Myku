@@ -15,7 +15,7 @@ body {
     position: relative;
     overflow: hidden;
   /* 1. 背景图路径（确保正确） */
-  background: url(../images/bg.jpg) no-repeat;
+  background: url(../bg.jpg) no-repeat;
   
   /* 2. 核心：铺满整个页面 */
   background-size: cover;       /* 保持比例，覆盖整个容器（可能裁剪边缘） */
