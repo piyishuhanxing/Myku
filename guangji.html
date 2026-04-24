@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>广济桥 - 技术特性数据可视化</title>
+    <!-- 引入ECharts库 -->
+    <script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f5f7fa;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        .layout-card {
+            width: 100%;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border-radius: 0;
+        }
+
+        .global-header {
+            background: url('images/赵州桥背景.jpg') no-repeat center center;
+            background-size: cover;
+            padding: 1.8rem 2.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            text-align: center;
+        }
+
+        .global-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1E2A3E, #2C3E50);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: #8b5a2b;
+            letter-spacing: -0.3px;
+            display: inline-block;
+            padding-left: 1.2rem;
+        }
+
+        .global-header .sub {
+            color: rgba(188, 11, 11, 0.8);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+
+        .content-split {
+            display: grid;
+            grid-template-columns: 1fr 1.05fr;
+            gap: 0;
+            background: #fefefe;
+        }
+
+        .left-text {
+         background: url('images/赵州桥文字.jpg') no-repeat center center;
+         background-size: cover;
+         padding: 2rem 2rem 2rem 2.5rem;
+         border-right: 1px solid #e9edf2;
+         transition: all 0.2s;
+       }
+
+        .text-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .text-card h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.2px;
+        }
+
+        .text-card p {
+            color: #2c3e50;
+            line-height: 1.65;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .text-card .highlight {
+            background: #e3f2fd;
+            padding: 1.2rem;
+            border-radius: 1rem;
+            margin: 1rem 0;
+            font-weight: 500;
+            color: #0f172a;
+            border-left: 4px solid #1a5f7a;
+        }
+
+        .text-card ul {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        .text-card li {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #334155;
+        }
+
+        .text-card li::before {
+            content: "▹";
+            color: #1a5f7a;
+            font-weight: bold;
+        }
+
+        .right-area {
+           display: flex;
+           flex-direction: column;
+           background: url('images/赵州桥文字.jpg') no-repeat center center;
+           background-size: cover;
+           padding: 2rem 2rem 2rem 1.8rem;
+           gap: 1.8rem;
+       }
+
+        .image-carousel {
+            position: relative;
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
+            border: 1px solid #eef2f8;
+            min-height: 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+            transition: opacity 0.2s ease;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            font-weight: 500;
+            width: 44px;
+            height: 44px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 20;
+            font-family: monospace;
+            line-height: 1;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.85);
+            transform: translateY(-50%) scale(1.03);
+        }
+
+        .carousel-btn.prev {
+            left: 16px;
+        }
+
+        .carousel-btn.next {
+            right: 16px;
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            z-index: 20;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px);
+            border-radius: 40px;
+            width: fit-content;
+            margin: 0 auto;
+            pointer-events: none;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transition: all 0.2s;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .dot.active {
+            background-color: #1a5f7a;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px white;
+        }
+
+        .dot:hover {
+            background-color: #ffffff;
+        }
+
+        .charts-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            border-radius: 1.2rem;
+            border: 1px solid #e9edf2;
+            box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s ease;
+            min-height: 260px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chart-container {
+            padding: 1.5rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e2a3e;
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .chart-description {
+            font-size: 0.85rem;
+            color: #5b6e8c;
+            margin-top: 0.4rem;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* 新增：技术特性卡片样式 */
+        .tech-stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .tech-stat-box {
+            background: linear-gradient(135deg, #e0f2f1, #b2dfdb);
+            padding: 1rem;
+            border-radius: 0.8rem;
+            text-align: center;
+            border-left: 4px solid #1a5f7a;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a5f7a;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #5b6e8c;
+            margin-top: 0.3rem;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.8rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #1a5f7a;
+        }
+
+        .feature-title {
+            color: #1e293b;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-desc {
+            color: #475569;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 950px) {
+            .content-split {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .left-text {
+                border-right: none;
+                border-bottom: 1px solid #e9edf2;
+                padding: 1.8rem;
+            }
+            .right-area {
+                padding: 1.8rem;
+            }
+            .global-header h1 {
+                font-size: 1.8rem;
+            }
+            .carousel-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .charts-split {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .chart-card {
+                min-height: 220px;
+            }
+            .right-area {
+                gap: 1.2rem;
+            }
+            .global-header {
+                padding: 1.2rem 1.5rem;
+            }
+            .text-card h2 {
+                font-size: 1.5rem;
+            }
+            .carousel-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1.4rem;
+            }
+            .carousel-dots {
+                bottom: 8px;
+                gap: 8px;
+            }
+            .dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+    </style>
+</head>
+<body>
+<div class="layout-card">
+    <!-- 全局第一行：标题部分 -->
+    <div class="global-header">
+        <h1>启闭之祖 · 广济桥</h1>
+        <div class="sub">技术特性与工程奇迹数据可视化系统</div>
+    </div>
+
+    <!-- 内容区域：左右分开 -->
+    <div class="content-split">
+        <!-- 左侧文字区域 -->
+        <div class="left-text">
+            <div class="text-card">
+                <h2>广济桥工程特性分析</h2>
+                
+                <p>广济桥，又名湘子桥，坐落于广东省潮州市古城东门外的韩江之上。始建于南宋乾道七年（1171年），由潮州知州曾汪主持建造，历经三百余年方形成完整格局，距今已有八百五十余年历史。它是中国第一座启闭式石桥，集梁桥、浮桥、拱桥于一体，被誉为"世界上最早的启闭式桥梁"。</p>
+
+                <div class="highlight">
+                    营造奇迹：广济桥原全长518米，现重建后长518米，宽5米，桥墩21座。首创"十八梭船廿四洲"格局，中间以十八只梭船连接成浮桥，可随潮汐开合，既通船只又利泄洪，称"过河拆桥"奇观，这一启闭式设计比西方同类桥梁早了数百年。广济桥历经洪水战火，至今屡毁屡建而格局犹存。
+                </div>
+
+                <p>广济桥的设计融合实用与美学；全桥气势磅礴，与韩山古塔遥相辉映，桥上的亭台楼阁雕梁画栋。全桥设有21座桥墩和24座不同形制的亭屋；石梁最长达15米、重约20吨，由潮汐运石法安装，各墩间以石卯与铁水浇筑连接，每段桥面都自成体系，避免单处坍塌累及全局；桥墩上游各设两座分水尖，可削减洪水冲击以及点缀桥景；桥面亭台楼阁，悬挂有形态各异的匾额；桥身微呈波浪形，按"东岸梁桥、西岸梁桥、中间浮桥"的古制布局。</p>
+
+                <!-- 广济桥技术特性统计 -->
+                <div class="tech-stats-container">
+                    <div class="tech-stat-box">
+                        <div class="stat-value">518m</div>
+                        <div class="stat-label">桥身总长</div>
+                    </div>
+                    <div class="tech-stat-box">
+                        <div class="stat-value">21座</div>
+                        <div class="stat-label">石砌桥墩</div>
+                    </div>
+                    <div class="tech-stat-box">
+                        <div class="stat-value">18只</div>
+                        <div class="stat-label">梭船浮桥</div>
+                    </div>
+                    <div class="tech-stat-box">
+                        <div class="stat-value">850+年</div>
+                        <div class="stat-label">历史年限</div>
+                    </div>
+                </div>
+
+                <!-- 技术特性详细分析 -->
+                <div style="margin-top: 1.5rem;">
+                    <div class="feature-item">
+                        <div class="feature-title">启闭式结构创新</div>
+                        <div class="feature-desc">广济桥首创"十八梭船廿四洲"的可开合结构，中间18只木船以铁索连接形成浮桥，可随韩江水位升降开合。这种设计既保证了陆路交通，又确保了韩江航运畅通，展现了古代工匠对水陆交通矛盾的巧妙解决。</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-title">抗洪稳定性</div>
+                        <div class="feature-desc">桥墩采用船形分水尖设计，有效分解洪水冲击力。各墩间相对独立，以铁水浇筑的石卯连接，形成柔性连接体系，能够适应韩江频繁的水位变化和洪水冲击，历经多次特大洪水而主体结构依然稳固。</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-title">多重功能冗余</div>
+                        <div class="feature-desc">桥梁集梁桥、浮桥、拱桥于一体，形成多重功能冗余。即使部分结构受损，其他部分仍可维持基本通行功能。24座亭屋不仅美观，还起到压桥稳定作用，增强整体结构抗风能力。</div>
+                    </div>
+                </div>
+
+                <ul style="margin-top: 1.5rem;">
+                    <li><strong>历史地位</strong>：1961年被国务院列为第一批全国重点文物保护单位；与赵州桥、洛阳桥、卢沟桥并称"中国古代四大名桥"。</li>
+                    <li><strong>技术影响</strong>：启闭式浮桥、梭船连接、亭屋压桥等创举对后世跨江桥梁（如福建宁化福津桥、浙江金华通济桥）产生深远影响，并传播至东南亚地区。</li>
+                    <li><strong>文化象征</strong>：广济桥是潮汕人文精神的标志，多次登上邮票、教科书，成为"到潮不到桥，枉向潮州走一遭"的文化地标。</li>
+                </ul>
+
+                <p style="margin-top: 1.2rem; font-style: italic; border-left: 2px solid #cbd5e1; padding-left: 1rem;">
+                    "潮州湘桥好风流，十八梭船廿四洲。" —— 潮州民谣
+                </p>
+            </div>
+        </div>
+
+        <!-- 右侧区域：上下结构 -->
+        <div class="right-area">
+            <!-- 右侧上半部分：图集轮播组件 -->
+            <div class="image-carousel" id="guangjiCarousel">
+                <img class="carousel-img" id="carouselImage" src="" alt="广济桥图集">
+                <button class="carousel-btn prev" id="prevBtn" aria-label="上一张">❮</button>
+                <button class="carousel-btn next" id="nextBtn" aria-label="下一张">❯</button>
+                <div class="carousel-dots" id="dotsContainer"></div>
+            </div>
+
+            <!-- 右侧下半部分：图表区域 -->
+            <div class="charts-split">
+                <!-- 左侧图表容器：结构特性柱状图 -->
+                <div class="chart-card">
+                    <div class="chart-container">
+                        <div class="chart-title">广济桥结构特性数据</div>
+                        <div id="structureChart" style="width: 100%; height: 240px;"></div>
+                        <div class="chart-description">主要工程技术参数对比</div>
+                    </div>
+                </div>
+                
+                <!-- 右侧图表容器：多维度价值雷达图 -->
+                <div class="chart-card">
+                    <div class="chart-container">
+                        <div class="chart-title">多维度价值评估</div>
+                        <div id="radarChart" style="width: 100%; height: 240px;"></div>
+                        <div class="chart-description">六大价值维度综合评分</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 广济桥图片轮播
+    (function() {
+        const imageList = [
+            {
+                src: "images/广济桥1.jpg",
+                alt: "广济桥全景 - 世界最早的启闭式桥梁"
+            },
+            {
+                src: "images/广济桥2.jpg",
+                alt: "广济桥侧面景观与韩江"
+            },
+            {
+                src: "images/广济桥3.jpg",
+                alt: "广济桥亭屋与建筑细节"
+            },
+            {
+                src: "images/广济桥4.jpg",
+                alt: "广济桥梭船浮桥特写"
+            }
+        ];
+        
+        let currentIndex = 0;
+        const carouselImg = document.getElementById('carouselImage');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const dotsContainer = document.getElementById('dotsContainer');
+        
+        function generateDots() {
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < imageList.length; i++) {
+                const dot = document.createElement('span');
+                dot.classList.add('dot');
+                if (i === currentIndex) dot.classList.add('active');
+                dot.dataset.index = i;
+                dot.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(e.currentTarget.dataset.index);
+                    if (!isNaN(idx) && idx !== currentIndex) {
+                        currentIndex = idx;
+                        updateImageAndDots();
+                    }
+                });
+                dotsContainer.appendChild(dot);
+            }
+        }
+        
+        function updateImageAndDots() {
+            if (!imageList.length) return;
+            const currentImage = imageList[currentIndex];
+            carouselImg.src = currentImage.src;
+            carouselImg.alt = currentImage.alt;
+            
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                if (idx === currentIndex) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        function nextImage() {
+            if (imageList.length === 0) return;
+            currentIndex = (currentIndex + 1) % imageList.length;
+            updateImageAndDots();
+        }
+        
+        function prevImage() {
+            if (imageList.length === 0) return;
+            currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
+            updateImageAndDots();
+        }
+        
+        function initCarousel() {
+            if (imageList.length === 0) {
+                carouselImg.src = "https://picsum.photos/id/104/800/500?grayscale";
+                carouselImg.alt = "暂无广济桥图片";
+                return;
+            }
+            generateDots();
+            currentIndex = 0;
+            updateImageAndDots();
+            
+            if (prevBtn) prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                prevImage();
+            });
+            if (nextBtn) nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                nextImage();
+            });
+            
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    prevImage();
+                    e.preventDefault();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        function handleImageError() {
+            const fallbackImages = [
+                "https://picsum.photos/id/20/800/500?grayscale",
+                "https://picsum.photos/id/96/800/500?grayscale"
+            ];
+            let usedFallback = false;
+            carouselImg.onerror = function() {
+                if (!usedFallback) {
+                    usedFallback = true;
+                    carouselImg.src = fallbackImages[0];
+                    carouselImg.alt = "广济桥示意图片 (备用)";
+                }
+            };
+        }
+        
+        initCarousel();
+        handleImageError();
+    })();
+</script>
+
+<script>
+    // 初始化ECharts图表
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof echarts === 'undefined') {
+            console.error("ECharts未加载成功");
+            return;
+        }
+        
+        // 1. 结构特性柱状图
+        const structureChart = echarts.init(document.getElementById('structureChart'));
+        const structureOption = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' },
+                formatter: function(params) {
+                    let result = params[0].name + '<br/>';
+                    params.forEach(function(item) {
+                        result += item.marker + item.seriesName + ': ' + item.value;
+                        if (item.seriesName === '数值') {
+                            if (params[0].name === '桥身长度') {
+                                result += ' 米';
+                            } else if (params[0].name === '历史年限') {
+                                result += ' 年';
+                            } else if (params[0].name === '桥墩数量') {
+                                result += ' 座';
+                            } else if (params[0].name === '梭船数量') {
+                                result += ' 只';
+                            }
+                        }
+                        result += '<br/>';
+                    });
+                    return result;
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                top: '10%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: ['桥身长度', '桥墩数量', '梭船数量', '亭屋数量', '历史年限'],
+                axisLine: { lineStyle: { color: '#7f8c8d' } },
+                axisLabel: { 
+                    color: '#5b6e8c',
+                    fontSize: 12
+                }
+            },
+            yAxis: {
+                type: 'value',
+                name: '数值',
+                axisLine: { lineStyle: { color: '#7f8c8d' } },
+                axisLabel: { 
+                    color: '#5b6e8c',
+                    fontSize: 12
+                },
+                splitLine: { 
+                    lineStyle: { 
+                        color: '#e9edf2',
+                        type: 'dashed'
+                    }
+                }
+            },
+            series: [
+                {
+                    name: '数值',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: [
+                        { value: 518, itemStyle: { color: '#1a5f7a' } },
+                        { value: 21, itemStyle: { color: '#2a7a94' } },
+                        { value: 18, itemStyle: { color: '#3a94a9' } },
+                        { value: 24, itemStyle: { color: '#4aadbe' } },
+                        { value: 850, itemStyle: { color: '#5ac7d3' } }
+                    ],
+                    label: {
+                        show: true,
+                        position: 'top',
+                        color: '#1e293b',
+                        fontWeight: 'bold',
+                        fontSize: 12
+                    },
+                    itemStyle: {
+                        borderRadius: [4, 4, 0, 0]
+                    }
+                }
+            ]
+        };
+        structureChart.setOption(structureOption);
+        
+        // 2. 多维度价值雷达图
+        const radarChart = echarts.init(document.getElementById('radarChart'));
+        const radarOption = {
+            tooltip: {
+                trigger: 'item'
+            },
+            radar: {
+                indicator: [
+                    { name: '历史价值', max: 10 },
+                    { name: '技术创新', max: 10 },
+                    { name: '文化意义', max: 10 },
+                    { name: '艺术价值', max: 10 },
+                    { name: '工程难度', max: 10 },
+                    { name: '旅游价值', max: 10 }
+                ],
+                center: ['50%', '50%'],
+                radius: '60%',
+                axisName: { 
+                    color: '#5b6e8c',
+                    fontSize: 12
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#e9edf2'
+                    }
+                },
+                splitArea: {
+                    show: true,
+                    areaStyle: {
+                        color: ['rgba(255,255,255,0.8)', 'rgba(240,242,245,0.6)']
+                    }
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#cbd5e1'
+                    }
+                }
+            },
+            series: [
+                {
+                    type: 'radar',
+                    data: [
+                        {
+                            value: [9.2, 9.8, 9.5, 8.9, 9.7, 8.5],
+                            name: '广济桥',
+                            areaStyle: { 
+                                color: 'rgba(26, 95, 122, 0.3)' 
+                            },
+                            lineStyle: { 
+                                color: '#1a5f7a',
+                                width: 2
+                            },
+                            itemStyle: { 
+                                color: '#1a5f7a' 
+                            },
+                            label: {
+                                show: true,
+                                formatter: function(params) {
+                                    return params.value;
+                                },
+                                color: '#1e293b',
+                                fontWeight: 'bold',
+                                fontSize: 11
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        radarChart.setOption(radarOption);
+        
+        // 窗口大小变化时重绘
+        window.addEventListener('resize', function() {
+            structureChart.resize();
+            radarChart.resize();
+        });
+    });
+</script>
+</body>
+</html>
