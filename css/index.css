@@ -32,7 +32,7 @@ body {
 header {
   position: relative;
   height: 1.25rem;
-  background: url(../images/head_bg.png) no-repeat;
+  background: url(..head_bg.png) no-repeat;
   background-size: 100% 100%;
 }
 header h1 {
